@@ -8,6 +8,26 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Lista de Contas</title>
 
+<script src="resources/js/jquery.js"></script>
+<script type="text/javascript">
+	
+	function deuCerto(dadosDaResposta){		
+		alert("Conta paga com sucesso");
+	}
+	function pagaAgora(id){		
+		$.get("pagaConta?id=" + id, deuCerto);
+	}
+
+</script>
+
+<script>
+	function pagaAgora(id){
+		$.post("pagaConta",{'id':id}, function(){
+			$("#conta_" + id).html("Paga");
+		
+		});		
+	}
+</script>
 	
 
 	
@@ -42,8 +62,15 @@
 			
 			<td><fmt:formatDate value="${conta.dataPagamento.time}" pattern="dd/MM/yyyy"/></td>	
 			<td>
-				<a href="removeConta?id=${conta.id}">Deletar</a>
-				<a href="mostraConta?id=${conta.id}">Alterar</a>
+				<a href="removeConta?id=${conta.id}">Deletar</a> |
+				<a href="mostraConta?id=${conta.id}">Alterar</a> |
+				
+				<c:if test="${conta.paga eq false}">
+				<a href="#" onclick="pagaAgora(${conta.id});">Pagar agora!</a>
+				</c:if>
+				<c:if test="${conta.paga eq true}">Paga!				
+				</c:if>
+				
 			
 			</td>
 		</tr>
