@@ -9,19 +9,27 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import br.com.caelum.contas.ConnectionFactory;
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
 import br.com.caelum.contas.modelo.Conta;
 import br.com.caelum.contas.modelo.TipoDaConta;
 
+@Repository
 public class ContaDAO {
 	private Connection connection;
 
-	public ContaDAO() {
+	@Autowired
+	public ContaDAO(DataSource ds) {
+
 		try {
-			this.connection = new ConnectionFactory().getConnection();
+			this.connection = ds.getConnection();
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
+
 	}
 
 	public void adiciona(Conta conta) {
@@ -37,7 +45,7 @@ public class ContaDAO {
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 	}
 
 	public void remove(Conta conta) {
@@ -52,7 +60,7 @@ public class ContaDAO {
 			stmt = connection.prepareStatement(sql);
 			stmt.setLong(1, conta.getId());
 			stmt.execute();
-			
+
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -65,13 +73,13 @@ public class ContaDAO {
 			stmt = connection.prepareStatement(sql);
 			stmt.setString(1, conta.getDescricao());
 			stmt.setBoolean(2, conta.isPaga());
-			stmt.setDate(3, conta.getDataPagamento() != null ? new Date(conta
-					.getDataPagamento().getTimeInMillis()) : null);
+			stmt.setDate(3,
+					conta.getDataPagamento() != null ? new Date(conta.getDataPagamento().getTimeInMillis()) : null);
 			stmt.setString(4, conta.getTipo().name());
 			stmt.setDouble(5, conta.getValor());
 			stmt.setLong(6, conta.getId());
 			stmt.execute();
-			
+
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -80,8 +88,7 @@ public class ContaDAO {
 	public List<Conta> lista() {
 		try {
 			List<Conta> contas = new ArrayList<Conta>();
-			PreparedStatement stmt = this.connection
-					.prepareStatement("select * from contas");
+			PreparedStatement stmt = this.connection.prepareStatement("select * from contas");
 
 			ResultSet rs = stmt.executeQuery();
 
@@ -101,14 +108,12 @@ public class ContaDAO {
 
 	public Conta buscaPorId(Long id) {
 
-		
 		if (id == null) {
 			throw new IllegalStateException("Id da conta nao deve ser nula.");
 		}
 
 		try {
-			PreparedStatement stmt = this.connection
-					.prepareStatement("select * from contas where id = ?");
+			PreparedStatement stmt = this.connection.prepareStatement("select * from contas where id = ?");
 			stmt.setLong(1, id);
 			ResultSet rs = stmt.executeQuery();
 
@@ -118,7 +123,7 @@ public class ContaDAO {
 
 			rs.close();
 			stmt.close();
-			
+
 			return null;
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
@@ -159,9 +164,9 @@ public class ContaDAO {
 			dataPagamento.setTime(data);
 			conta.setDataPagamento(dataPagamento);
 		}
-		
+
 		conta.setTipo(Enum.valueOf(TipoDaConta.class, rs.getString("tipo")));
-		
+
 		return conta;
 	}
 }
